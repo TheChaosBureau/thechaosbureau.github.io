@@ -13,27 +13,8 @@ test('landing page contains no private dashboard surface', () => {
   assert.doesNotMatch(html, /fleet|tailnet|tmux|api\//i);
 });
 
-const read = (path) => fs.readFileSync(new URL(path, import.meta.url), 'utf8');
-
-test('Drive Artifacts home page links to its privacy policy', () => {
-  const page = read('../drive-artifacts/index.html');
-  assert.match(page, /<title>Drive Artifacts<\/title>/);
-  assert.match(page, /href="\/drive-artifacts\/privacy\/"/);
-});
-
-test('Drive Artifacts privacy policy names the one Drive permission', () => {
-  const page = read('../drive-artifacts/privacy/index.html');
-  assert.match(page, /Privacy policy for the Drive Artifacts app/);
-  assert.match(page, /drive\.file/);
-});
-
-test('the deploy copies the Drive Artifacts pages into the site', () => {
-  assert.match(read('../.github/workflows/pages.yml'), /cp -r drive-artifacts _site\//);
-});
-
-test('Drive Artifacts privacy policy offers no warranty and no contact', () => {
-  const page = read('../drive-artifacts/privacy/index.html');
-  assert.match(page, /at your own risk/);
-  assert.match(page, /no\s+support channel/);
-  assert.doesNotMatch(page, /Contact|\/issues/);
+test('the Drive Artifacts pages are served by their own repository, not copied here', () => {
+  assert.equal(fs.existsSync(new URL('../drive-artifacts', import.meta.url)), false);
+  const deploy = fs.readFileSync(new URL('../.github/workflows/pages.yml', import.meta.url), 'utf8');
+  assert.doesNotMatch(deploy, /drive-artifacts/);
 });
