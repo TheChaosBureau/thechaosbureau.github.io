@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Drive Artifacts stores build artifacts from GitHub Actions in your own Google Drive.">
+  <title>Drive Artifacts</title>
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/drive-artifacts/doc.css">
+</head>
+<body>
+  <main class="doc">
+    <header>
+      <p class="eyebrow"><a href="/">The Chaos Bureau</a></p>
+      <h1>Drive Artifacts</h1>
+      <p class="lede">Store build artifacts from your GitHub Actions workflows in your own Google Drive.</p>
+    </header>
+
+    <h2>Three steps</h2>
+    <ol>
+      <li>
+        <p>Install the CLI and log in once, at a machine with a browser:</p>
+<pre><code>pipx install drive-artifacts          # or: uv tool install drive-artifacts
+drive-artifacts login --repo you/your-repo</code></pre>
+        <p>Your browser opens Google's consent page. The app asks for one permission, <code>drive.file</code>: it can see only the files it creates. <code>login</code> then stores the token as the repository secret <code>DRIVE_ARTIFACTS_TOKEN</code> using <code>gh</code>; without <code>gh</code>, run <code>drive-artifacts login --print</code> and add the secret by hand. No Google Cloud project, no API keys.</p>
+      </li>
+      <li>
+        <p>Upload in a workflow:</p>
+<pre><code>- uses: TheChaosBureau/drive-artifacts@v0
+  with:
+    name: wheel
+    path: dist/
+    token: ${{ secrets.DRIVE_ARTIFACTS_TOKEN }}
+    retention-days: 30</code></pre>
+      </li>
+      <li>
+        <p>Download in another job, run, or from your laptop:</p>
+<pre><code>- uses: TheChaosBureau/drive-artifacts/download@v0
+  with:
+    name: wheel
+    path: dist/
+    token: ${{ secrets.DRIVE_ARTIFACTS_TOKEN }}
+    # run-id: 123          another run
+    # ref: refs/heads/main the latest artifact for a ref</code></pre>
+<pre><code>export DRIVE_ARTIFACTS_TOKEN=...   # the value `drive-artifacts login --print` gave you
+drive-artifacts download --name wheel --ref refs/heads/main --repo-id 123456 --repo you/your-repo</code></pre>
+      </li>
+    </ol>
+
+    <h2>What lands in Drive</h2>
+<pre><code>GitHub Artifacts/
+  "you/your-repo"/      one folder: the slash is part of its name
+    &lt;run id&gt;-&lt;attempt&gt;-&lt;name&gt;.zip</code></pre>
+    <p>One zip per artifact, like GitHub's own, in one folder per repository (named <code>owner/name</code>, slash included). The app owns the <code>GitHub Artifacts</code> folder (configurable with <code>root</code>). It cannot see, list or touch anything else in your Drive, and revoking the app at <a href="https://myaccount.google.com/permissions">https://myaccount.google.com/permissions</a> ends its access instantly. Expired artifacts go to Drive's trash, where they stay recoverable for 30 days.</p>
+
+    <h2>Limits worth knowing</h2>
+    <ul>
+      <li>Google allows 100 refresh tokens per account per app; the oldest is revoked silently when you log in a 101st time. One token per repository or organisation is plenty.</li>
+      <li>A token unused for six months stops working. <code>drive-artifacts login</code> again.</li>
+      <li>Drive's trash empties itself after 30 days. Pruning never deletes permanently.</li>
+      <li>Your Drive quota is the limit. Personal accounts start at 15 GB.</li>
+    </ul>
+
+    <p>Read the <a href="/drive-artifacts/privacy/">privacy policy</a> for the Drive Artifacts app.</p>
+
+    <footer>
+      <span>The Chaos Bureau</span>
+      <a href="/drive-artifacts/privacy/">Privacy policy</a>
+    </footer>
+  </main>
+</body>
+</html>
