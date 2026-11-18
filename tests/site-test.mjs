@@ -30,3 +30,10 @@ test('Drive Artifacts privacy policy names the one Drive permission', () => {
 test('the deploy copies the Drive Artifacts pages into the site', () => {
   assert.match(read('../.github/workflows/pages.yml'), /cp -r drive-artifacts _site\//);
 });
+
+test('Drive Artifacts privacy policy offers no warranty and no contact', () => {
+  const page = read('../drive-artifacts/privacy/index.html');
+  assert.match(page, /at your own risk/);
+  assert.match(page, /no\s+support channel/);
+  assert.doesNotMatch(page, /Contact|\/issues/);
+});
